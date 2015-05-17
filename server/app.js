@@ -5,13 +5,9 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 
-var routes = require('./routes/index');
-var users = require('./routes/users');
+var routes = require('./router/index');
+var users = require('./router/routes/users');
 
-/**
- * Route Imports
- */
-var signup = require('./routes/signup');
 
 var app = express();
 
@@ -34,14 +30,8 @@ if (app.get('env') === 'development') {
     app.use(express.static(path.join(__dirname, '../client/.tmp')));
     app.use(express.static(path.join(__dirname, '../client/app')));
 
-    // Error Handling
-    app.use(function(err, req, res, next) {
-        res.status(err.status || 500);
-        res.render('error', {
-            message: err.message,
-            error: err
-        });
-    });
+
+
 }
 
 /**
@@ -49,23 +39,19 @@ if (app.get('env') === 'development') {
  */
 if (app.get('env') === 'production') {
 
-    // changes it to use the optimized version for production
-    app.use(express.static(path.join(__dirname, '/dist')));
+	// changes it to use the optimized version for production
+	app.use(express.static(path.join(__dirname, '/dist')));
 
-    // production error handler
-    // no stacktraces leaked to user
-    app.use(function(err, req, res, next) {
-        res.status(err.status || 500);
-        res.render('error', {
-            message: err.message,
-            error: {}
-        });
-    });
 }
 
 /**
  * Routes
  */
-app.use('/signup', signup);
+var router = require('./router')(app);
+
+// Error Handling
+app.use(function(err, req, res, next) {
+	res.status(err.status || 500);
+});
 
 module.exports = app;
